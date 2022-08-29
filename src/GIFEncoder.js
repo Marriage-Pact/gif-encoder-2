@@ -31,7 +31,7 @@ class ByteArray {
 }
 
 class GIFEncoder extends EventEmitter {
-  constructor(width, height, algorithm = 'neuquant', useOptimizer = false, totalFrames = 0) {
+  constructor(width, height, algorithm = 'neuquant', useOptimizer = false, totalFrames = 0, skipPaletteCheck = false) {
     super()
 
     this.width = ~~width
@@ -39,6 +39,7 @@ class GIFEncoder extends EventEmitter {
     this.algorithm = algorithm
     this.useOptimizer = useOptimizer
     this.totalFrames = totalFrames
+    this.skipPaletteCheck = skipPaletteCheck
     this.frames = 1
     this.threshold = 90
     this.indexedPixels = null
@@ -136,18 +137,21 @@ class GIFEncoder extends EventEmitter {
     var data = this.image
 
     if (this.useOptimizer && this.prevImage) {
-      var delta = 0
-      for (var len = data.length, i = 0; i < len; i += 4) {
-        if (
-          data[i] !== this.prevImage[i] ||
-          data[i + 1] !== this.prevImage[i + 1] ||
-          data[i + 2] !== this.prevImage[i + 2]
-        ) {
-          delta++
+      if (this.skipPaletteCheck) this.reuseTab = true;
+      else {
+        var delta = 0
+        for (var len = data.length, i = 0; i < len; i += 4) {
+          if (
+            data[i] !== this.prevImage[i] ||
+            data[i + 1] !== this.prevImage[i + 1] ||
+            data[i + 2] !== this.prevImage[i + 2]
+          ) {
+            delta++
+          }
         }
+        const match = 100 - Math.ceil((delta / (data.length / 4)) * 100)
+        this.reuseTab = match >= this.threshold
       }
-      const match = 100 - Math.ceil((delta / (data.length / 4)) * 100)
-      this.reuseTab = match >= this.threshold
     }
 
     this.prevImage = data
