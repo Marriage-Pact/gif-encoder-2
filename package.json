@@ -18,8 +18,5 @@
     "email": "benjaminadk@gmail.com",
     "url": "https://github.com/benjaminadk"
   },
-  "license": "UNLICENSE",
-  "devDependencies": {
-    "canvas": "2.5.0"
-  }
+  "license": "UNLICENSE"
 }
